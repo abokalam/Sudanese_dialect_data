@@ -1,0 +1,48 @@
+//////////////install gpu drivers for ubuntu 18.04 LTS////////////////////////////////////////
+
+curl -O https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+sudo add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /"
+sudo apt update
+sudo apt install cuda
+nvidia-smi
+
+//////////////prepare and run benchmarks for BERT///////////////////////////////////////////
+#prepare VM for the benchmark code
+cd ~
+mkdir tmp
+cd tmp
+wget https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
+bash Anaconda3-5_____something
+export PATH=~/anaconda3/bin:$PATH
+conda --version
+conda install -c pytorch pytorch
+conda install -c conda-forge transformers
+git clone https://github.com/huggingface/transformers
+cd transformers
+pip install .
+
+#actual benchmark code
+
+from transformers import PyTorchBenchmark, PyTorchBenchmarkArguments
+args = PyTorchBenchmarkArguments(models=["bert-base-uncased"], batch_sizes=[1], sequence_lengths=[8, 32, 128, 512])
+#args = PyTorchBenchmarkArguments(models=["bert-base-uncased"], batch_sizes=[8], sequence_lengths=[8, 32, 128, 512],no_cuda=True)
+benchmark = PyTorchBenchmark(args)
+results = benchmark.run()
+print(results)
+
+
+//////////////Install pip3 in VM/////////////////////////////////////////////////////////////////
+#install pip3
+sudo apt update
+sudo apt install python3-pip
+pip3 --version
+
+//////////////how to use screen in linux VM/////////////////////////////////////////////////////
+type screen
+wait untile the virtual screen boots
+execute the thread
+type ctrl+a then ctrl+d ==== this will ditach the virtual screen
+you can now close your ssh
+to monitor your results type screen -r to resume the virtual display
