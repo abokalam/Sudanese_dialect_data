@@ -1,5 +1,5 @@
 # to run this script put your csv files in a file called 'input_file' and create a file called 'clean_data_output_file' wherer your outputs will be placed
-# your input file should have the header ['Datetime' , 'Text' , 'username']
+# your input file should have the header ['Time' , 'Text' , 'User']
 import numpy as np
 import io
 import os
@@ -22,7 +22,7 @@ def deEmojify(text):
                            "]+", flags = re.UNICODE)
     return regrex_pattern.sub(r'',text)
 
-print("script execution begins")
+print("script execution begins (new code)")
 
 mycsvdir = 'input_file'
 csvfiles = glob.glob(os.path.join(mycsvdir, '*.csv'))
@@ -32,7 +32,7 @@ for csvfile in csvfiles:
    start_time = time.time()
    print(csvfile)
    df = pd.read_csv(csvfile)
-   new_list = [['Datetime' , 'Text' , 'username']]
+   new_list = [['Time' , 'Text' , 'User']]
    initialized = True
    counter = 0
 
@@ -42,8 +42,8 @@ for csvfile in csvfiles:
          text_array = text_array.replace('#','')
          text_array = text_array.split()
          filtered_text_array = []
-         if counter > 490:
-            break
+         # if counter > 490:
+            # break
          for word in text_array:
             try:
               lang = detect(word)
@@ -60,22 +60,24 @@ for csvfile in csvfiles:
          # print("////////"+new_text_array)
          counter += 1
          counter2 += 1
+         if counter % 10000 == 0:
+              print(counter)
          # print(counter)
-         if row['username'] != 'username': 
-              username = row['username']
+         if row['User'] != 'User': 
+              User = row['User']
          # if (initialized == True):
-         #   new_list = [[row['Datetime'] , new_text_array , row['username']]]
+         #   new_list = [[row['Time'] , new_text_array , row['User']]]
          #   initialized == False
          # else:
          if new_text_array != '':
-            new_list.append([row['Datetime'] , new_text_array , row['username']])
+            new_list.append([row['Time'] , new_text_array , row['User']])
          # print(len(new_list))
       
-   new_df = pd.DataFrame(new_list,columns=['Datetime','Text', 'username'])
+   new_df = pd.DataFrame(new_list,columns=['Time','Text', 'User'])
    new_list.clear()
-   print('saving file : ' + username + '   number of lines :' + str(counter) + '  cleaning time: ' + str(time.time() - start_time))
-   file_name = username + '_cleaned' + '.csv'
-   # print(username)
+   print('saving file : ' + User + '   number of lines :' + str(counter) + '  cleaning time: ' + str(time.time() - start_time))
+   file_name = User + '_cleaned' + '.csv'
+   # print(User)
    path = "clean_data_output_file/" + file_name
    new_df.to_csv(path)
 print('number of lines : ' +  str(counter2))
