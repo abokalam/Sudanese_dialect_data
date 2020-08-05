@@ -46,3 +46,31 @@ execute the thread
 type ctrl+a then ctrl+d ==== this will ditach the virtual screen
 you can now close your ssh
 to monitor your results type screen -r to resume the virtual display
+
+////////////configure TPU with VM instance////////////////////////////////////////////////////
+first create a compute engine VM
+
+install ctpu tool in the VM machine:
+wget https://dl.google.com/cloud_tpu/ctpu/latest/linux/ctpu && chmod a+x ctpu
+
+authenticate operations of adding and deleting TPUs in the VM:
+gcloud auth application-default login
+and follow the instructions
+
+add ctpu to your path:
+sudo cp ctpu /usr/bin/
+
+create a TPU instance, the instance should have the same name as the VM machine (change the project and zone for the next command) (--tpu-only is used because we already have the cpu in the VM, --noconf so that the VM does not ask you for further permissions):
+ctpu up --name=tpu-test --project=deep-learning-projects-283921 --zone=europe-west4-a --tpu-size=v3-8  --tpu-only   --tf-version=1.15.dev20190821 --noconf
+
+see if the tpu is running or not:
+ctpu status
+
+delete the tpu and VM instance:
+ctpu delete
+
+restart the tpu and cpu:
+ctpu restart
+
+for more options use:
+ctpu
