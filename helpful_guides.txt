@@ -90,3 +90,21 @@ project_id = '#your_project_id'
 bucket_name = '#your_bucket_name'
 !gsutil -m cp -r /content/drive/My\ Drive/Data/* gs://{bucket_name}/
 #If you copy more than a few files, use the -m option for gsutil, as it will enable multi-threading and speed up the copy process significantly.
+
+////////////////////////////making create_pretraining_data.py work in bert pretraining/////////////////////////////////////
+this code will always give you OOM error if you are just shoving the whole dataset in one go
+to solve this problem you should partition your data into smaller files each with 250000 lines and then run the code in each file with a different output file. see the command below
+
+python3 create_pretraining_data.py \
+  --input_file=gs://sudabert_bucket/sudanese_txt_cleaned_shuffled_splits/suda_txt_1.txt \
+  --output_file=gs://sudabert_bucket/tmp/tf_examples.tfrecord_1 \
+  --vocab_file=gs://sudabert_bucket/ar_bert/vocab.txt \
+  --do_lower_case=True \
+  --max_seq_length=128 \
+  --max_predictions_per_seq=20 \
+  --masked_lm_prob=0.15 \
+  --random_seed=12345 \
+  --dupe_factor=5
+
+when you run the pretraining the input file will be gs://sudabert_bucket/tmp/t
+
