@@ -106,5 +106,28 @@ python3 create_pretraining_data.py \
   --random_seed=12345 \
   --dupe_factor=5
 
-when you run the pretraining the input file will be gs://sudabert_bucket/tmp/t
+when you run the pretraining the input file will be gs://sudabert_bucket/tmp/ using the following command 
+
+  python3 run_pretraining.py \
+  --input_file=gs://sudabert_bucket/tmp/* \
+  --output_dir=gs://sudabert_bucket/pretraining_output \
+  --do_train=True \
+  --do_eval=True \
+  --bert_config_file=gs://sudabert_bucket/ar_bert/config.json \
+  --init_checkpoint=gs://sudabert_bucket/ar_bert/ar_bert_base_uncased.ckpt \
+  --train_batch_size=32 \
+  --max_seq_length=128 \
+  --max_predictions_per_seq=20 \
+  --num_train_steps=100000 \
+  --num_warmup_steps=1000 \
+  --learning_rate=2e-5 \
+  --use_tpu=True \
+  --tpu_name=bert-tpu-pretraining
+
+the above commands should be run in bert tensorflow repo i.e. the commands should be run inside the bert file downloaded with the command:
+git clone https://github.com/google-research/bert.git
+
+
+
+
 
