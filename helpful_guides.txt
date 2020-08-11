@@ -128,6 +128,35 @@ the above commands should be run in bert tensorflow repo i.e. the commands shoul
 git clone https://github.com/google-research/bert.git
 
 
+////////////////////////////converting bert original tf checkpoint to pytorch(.bin)/////////////////////////////////////
+This CLI takes as input a TensorFlow checkpoint (three files (data, index, meta) starting with bert_model.ckpt) and the associated configuration file (bert_config.json), and creates a PyTorch model for this configuration.
+code: https://github.com/huggingface/transformers/blob/master/src/transformers/convert_bert_original_tf_checkpoint_to_pytorch.py
+just take the convert_tf_checkpoint_to_pytorch function and use it.
+convert_tf_checkpoint_to_pytorch(path_to_model.ckpt, path_to_config.json, path_to_the_file_where_you_want_to_save_model.bin)
 
 
+////////////////////////////finetune pretrained bert (pretraining files are not published in huggingface surver) on sequence classification/////////////////////////////////////
+1. this requires (model.bin, config.lson, vocab.txt), so firstly, convert tf checkpoint to pytorch.
+2. follow this notebook: https://github.com/aub-mind/arabert/blob/master/examples/AraBERT_Text_Classification_with_HF_Trainer_Pytorch_GPU.ipynb
+until reaching the cell:
 
+config = AutoConfig.from_pretrained(model_name,num_labels=num_labels, output_attentions=True) ##needed for the visualizations
+tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=False, do_basic_tokenize=True, never_split=never_split_tokens)
+model = BertForSequenceClassification.from_pretrained(model_name,config=config)
+
+and change it to:
+
+config = PretrainedConfig.from_pretrained(path_to_config.json,num_labels=num_labels, output_attentions=True) ##needed for the visualizations
+tokenizer = BertTokenizer.from_pretrained(path_to_vocab.txt, do_lower_case=False, do_basic_tokenize=True, never_split=never_split_tokens)
+model = BertForSequenceClassification.from_pretrained(path_to_model.bin, config=config)
+
+3. you can skip the tensorboard and visualization part at the end of the notebook but:
+you have to run trainer.evaluate() after training (to get the test-set results).
+
+
+////////////////////////////Convert Pytorch checkpoint to Tensorflow checkpoint/////////////////////////////////////
+if the pytorch model is saved in huggingface servers, follow this notebook:
+https://colab.research.google.com/drive/1BDEnjU9qE2brp36NC4XF0pbcfNEZNFWd?usp=sharing
+
+if it is saved locally, run this code:
+https://github.com/huggingface/transformers/blob/master/src/transformers/convert_bert_pytorch_checkpoint_to_original_tf.py
