@@ -64,6 +64,9 @@ sudo cp ctpu /usr/bin/
 create a TPU instance, the instance should have the same name as the VM machine (change the project and zone for the next command) (--tpu-only is used because we already have the cpu in the VM, --noconf so that the VM does not ask you for further permissions):
 ctpu up --name=tpu-test --project=deep-learning-projects-283921 --zone=europe-west4-a --tpu-size=v3-8  --tpu-only   --tf-version=1.15.dev20190821 --noconf
 
+#for ctpu 2-8
+ctpu up --name=tpu-test --project=deep-learning-projects-283921 --zone=us-central1-f --tpu-size=v2-8  --tpu-only   --tf-version=2.3.0.dev20200620 --noconf
+
 see if the tpu is running or not:
 ctpu status
 
