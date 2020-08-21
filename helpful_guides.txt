@@ -1,0 +1,179 @@
+//////////////install gpu drivers for ubuntu 18.04 LTS////////////////////////////////////////
+
+curl -O https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+sudo add-apt-repository "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /"
+sudo apt update
+sudo apt install cuda
+nvidia-smi
+
+//////////////prepare and run benchmarks for BERT///////////////////////////////////////////
+#prepare VM for the benchmark code
+cd ~
+mkdir tmp
+cd tmp
+wget https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
+bash Anaconda3-5_____something
+export PATH=~/anaconda3/bin:$PATH
+conda --version
+conda install -c pytorch pytorch
+conda install -c conda-forge transformers
+git clone https://github.com/huggingface/transformers
+cd transformers
+pip install .
+
+#actual benchmark code
+
+from transformers import PyTorchBenchmark, PyTorchBenchmarkArguments
+args = PyTorchBenchmarkArguments(models=["bert-base-uncased"], batch_sizes=[1], sequence_lengths=[8, 32, 128, 512])
+#args = PyTorchBenchmarkArguments(models=["bert-base-uncased"], batch_sizes=[8], sequence_lengths=[8, 32, 128, 512],no_cuda=True)
+benchmark = PyTorchBenchmark(args)
+results = benchmark.run()
+print(results)
+
+
+//////////////Install pip3 in VM/////////////////////////////////////////////////////////////////
+#install pip3
+sudo apt update
+sudo apt install python3-pip
+pip3 --version
+
+//////////////how to use screen in linux VM/////////////////////////////////////////////////////
+type screen
+wait untile the virtual screen boots
+execute the thread
+type ctrl+a then ctrl+d ==== this will ditach the virtual screen
+you can now close your ssh
+to monitor your results type screen -r to resume the virtual display
+
+
+////////////configure TPU with VM instance////////////////////////////////////////////////////
+first create a compute engine VM
+
+install ctpu tool in the VM machine:
+wget https://dl.google.com/cloud_tpu/ctpu/latest/linux/ctpu && chmod a+x ctpu
+
+authenticate operations of adding and deleting TPUs in the VM:
+gcloud auth application-default login
+and follow the instructions
+
+add ctpu to your path:
+sudo cp ctpu /usr/bin/
+
+create a TPU instance, the instance should have the same name as the VM machine (change the project and zone for the next command) (--tpu-only is used because we already have the cpu in the VM, --noconf so that the VM does not ask you for further permissions):
+ctpu up --name=tpu-test --project=deep-learning-projects-283921 --zone=europe-west4-a --tpu-size=v3-8  --tpu-only   --tf-version=1.15.dev20190821 --noconf
+
+see if the tpu is running or not:
+ctpu status
+
+delete the tpu and VM instance:
+ctpu delete
+
+restart the tpu and cpu:
+ctpu restart
+
+for more options use:
+ctpu
+
+
+//////////////Transferring data between Google Drive and Google Cloud Storage using Google Colab/////////////////////////////////////////////////////
+#Mount Google Drive in Colab
+#Connect to GCS bucket:
+from google.colab import auth
+auth.authenticate_user()
+project_id = '#your_project_id'
+!gcloud config set project {project_id}
+!gsutil ls
+#This will connect to your project and list all buckets
+#copy data from or to GCS using gsutil cp command:
+bucket_name = '#your_bucket_name'
+!gsutil -m cp -r /content/drive/My\ Drive/Data/* gs://{bucket_name}/
+#If you copy more than a few files, use the -m option for gsutil, as it will enable multi-threading and speed up the copy process significantly.
+
+////////////////////////////making create_pretraining_data.py work in bert pretraining/////////////////////////////////////
+this code will always give you OOM error if you are just shoving the whole dataset in one go
+to solve this problem you should partition your data into smaller files each with 250000 lines and then run the code in each file with a different output file. see the command below
+
+python3 create_pretraining_data.py \
+  --input_file=gs://sudabert_bucket/sudanese_txt_cleaned_shuffled_splits/suda_txt_1.txt \
+  --output_file=gs://sudabert_bucket/tmp/tf_examples.tfrecord_1 \
+  --vocab_file=gs://sudabert_bucket/ar_bert/vocab.txt \
+  --do_lower_case=True \
+  --max_seq_length=128 \
+  --max_predictions_per_seq=20 \
+  --masked_lm_prob=0.15 \
+  --random_seed=12345 \
+  --dupe_factor=5
+
+when you run the pretraining the input file will be gs://sudabert_bucket/tmp/ using the following command 
+
+  python3 run_pretraining.py \
+  --input_file=gs://sudabert_bucket/tmp/* \
+  --output_dir=gs://sudabert_bucket/pretraining_output \
+  --do_train=True \
+  --do_eval=True \
+  --bert_config_file=gs://sudabert_bucket/ar_bert/config.json \
+  --init_checkpoint=gs://sudabert_bucket/ar_bert/ar_bert_base_uncased.ckpt \
+  --train_batch_size=32 \
+  --max_seq_length=128 \
+  --max_predictions_per_seq=20 \
+  --num_train_steps=100000 \
+  --num_warmup_steps=1000 \
+  --learning_rate=2e-5 \
+  --use_tpu=True \
+  --tpu_name=bert-tpu-pretraining
+
+the above commands should be run in bert tensorflow repo i.e. the commands should be run inside the bert file downloaded with the command:
+git clone https://github.com/google-research/bert.git
+
+
+////////////////////////////converting bert original tf checkpoint to pytorch(.bin)/////////////////////////////////////
+This CLI takes as input a TensorFlow checkpoint (three files (data, index, meta) starting with bert_model.ckpt) and the associated configuration file (bert_config.json), and creates a PyTorch model for this configuration.
+code: https://github.com/huggingface/transformers/blob/master/src/transformers/convert_bert_original_tf_checkpoint_to_pytorch.py
+just take the convert_tf_checkpoint_to_pytorch function and use it.
+convert_tf_checkpoint_to_pytorch(path_to_model.ckpt, path_to_config.json, path_to_the_file_where_you_want_to_save_model.bin)
+
+
+////////////////////////////finetune pretrained bert (pretraining files are not published in huggingface surver) on sequence classification/////////////////////////////////////
+1. this requires (model.bin, config.lson, vocab.txt), so firstly, convert tf checkpoint to pytorch.
+2. follow this notebook: https://github.com/aub-mind/arabert/blob/master/examples/AraBERT_Text_Classification_with_HF_Trainer_Pytorch_GPU.ipynb
+until reaching the cell:
+
+config = AutoConfig.from_pretrained(model_name,num_labels=num_labels, output_attentions=True) ##needed for the visualizations
+tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=False, do_basic_tokenize=True, never_split=never_split_tokens)
+model = BertForSequenceClassification.from_pretrained(model_name,config=config)
+
+and change it to:
+
+config = PretrainedConfig.from_pretrained(path_to_config.json,num_labels=num_labels, output_attentions=True) ##needed for the visualizations
+tokenizer = BertTokenizer.from_pretrained(path_to_vocab.txt, do_lower_case=False, do_basic_tokenize=True, never_split=never_split_tokens)
+model = BertForSequenceClassification.from_pretrained(path_to_model.bin, config=config)
+
+3. you can skip the tensorboard and visualization part at the end of the notebook but:
+you have to run trainer.evaluate() after training (to get the test-set results).
+
+
+////////////////////////////Convert Pytorch checkpoint to Tensorflow checkpoint/////////////////////////////////////
+if the pytorch model is saved in huggingface servers, follow this notebook:
+https://colab.research.google.com/drive/1BDEnjU9qE2brp36NC4XF0pbcfNEZNFWd?usp=sharing
+
+if it is saved locally, run this code:
+https://github.com/huggingface/transformers/blob/master/src/transformers/convert_bert_pytorch_checkpoint_to_original_tf.py
+
+////////////////////////////change to python 3.x /////////////////////////////////////////////////
+sudo apt-get update
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt-get update
+sudo apt-get install python3.x
+
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.x 2
+sudo update-alternatives --config python3
+
+//////////////////////////////////install tensorflow 1.12 /////////////////////////////////////////////////////
+pip3 install tensorflow-gpu==1.12.0
+pip3 install tensorflow==1.12.0
+
+
+////////////////////////////////////notes some errors ///////////////////////////////////////////////////////
+when facing segmentation fault or killed this probably due to insufficient ram memory
