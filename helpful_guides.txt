@@ -180,3 +180,29 @@ pip3 install tensorflow==1.12.0
 
 ////////////////////////////////////notes some errors ///////////////////////////////////////////////////////
 when facing segmentation fault or killed this probably due to insufficient ram memory
+
+///////////////////////////////////configure GCP TPU for pytorch/xla ///////////////////////////////////////
+create a VM with boot image debian-9-torch-xla-v20200821 (can be found under category Deep Learning for Linux)
+
+then create the TPU as instructed before
+
+activate conda enviroment named torch-xla-nightly:
+conda activate torch-xla-nightly
+
+check your TPU Ip address at TPUs page in GCP console
+
+add TPU configuration to the VM path (replace $IP_ADDRESS$ with the ip address of your TPU):
+export XRT_TPU_CONFIG="tpu_worker;0;$IP_ADDRESS$:8470"
+
+check if this worked:
+python3 and then
+import torch
+import torch_xla
+import torch_xla.core.xla_model as xm
+dev = xm.xla_device()
+t1 = torch.ones(3, 3, device = dev)
+print(t1)
+
+
+
+
