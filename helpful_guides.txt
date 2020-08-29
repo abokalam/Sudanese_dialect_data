@@ -210,5 +210,16 @@ t1 = torch.ones(3, 3, device = dev)
 print(t1)
 
 
+////////////////////////////////////fine-tuning ///////////////////////////////////////////////////////
+Sentiment Analysis:
+AJGT : https://colab.research.google.com/drive/13F8pk6shiap69LPi8pqMBhoEXsyJZGzP?usp=sharing
+ArSenTD-LEV : https://colab.research.google.com/drive/1shm1xEvVlbq3Kp8jQtrRjm9Y2QHOYB8N?usp=sharing
+ASTD : https://colab.research.google.com/drive/1f7tIbqrK_dIOZEVB4sK-Qwbf02hpPO6j?usp=sharing
+HARD : https://colab.research.google.com/drive/1uX7yRs5NZccMS0san4qY4v7dTn_JXkxL?usp=sharing
+LABR : https://colab.research.google.com/drive/18ycYrARov_SMUsxqDfJwwcOiRvYaUQ-h?usp=sharing
 
+Named Entity Recognition:
+ANERCorp : https://colab.research.google.com/drive/1qq_EbosfZuTFNB_zV42hF357TuX5C9pq?usp=sharing
 
+Make sure this folder is added to your drive : https://drive.google.com/drive/folders/1_RmxaCi6fBAYEns-m2FsWDuds8moIXM_?usp=sharing
+It contains our pretrained model, config and vocab files.
