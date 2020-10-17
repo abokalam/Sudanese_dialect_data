@@ -1,0 +1,56 @@
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 450.51.05    Driver Version: 450.51.05    CUDA Version: 11.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla K80           On   | 00000000:00:04.0 Off |                    0 |
+| N/A   71C    P8    33W / 149W |      0MiB / 11441MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+
+//////////////////////////////////////////////////////////////////////
+
+====================       INFERENCE - SPEED - RESULT       ====================
+--------------------------------------------------------------------------------
+          Model Name             Batch Size     Seq Length     Time in s   
+--------------------------------------------------------------------------------
+      bert-base-uncased              1               8             0.016     
+      bert-base-uncased              1               32            0.015     
+      bert-base-uncased              1              128            0.031     
+      bert-base-uncased              1              512            0.076     
+--------------------------------------------------------------------------------
+
+====================      INFERENCE - MEMORY - RESULT       ====================
+--------------------------------------------------------------------------------
+          Model Name             Batch Size     Seq Length    Memory in MB 
+--------------------------------------------------------------------------------
+      bert-base-uncased              1               8              758      
+      bert-base-uncased              1               32             758      
+      bert-base-uncased              1              128             762      
+      bert-base-uncased              1              512             830      
+--------------------------------------------------------------------------------
+
+====================        ENVIRONMENT INFORMATION         ====================
+- transformers_version: 3.0.2
+- framework: PyTorch
+- use_torchscript: False
+- framework_version: 1.5.1
+- python_version: 3.7.6
+- system: Linux
+- cpu: x86_64
+- architecture: 64bit
+- date: 2020-07-21
+- time: 14:08:22.410962
+- fp16: False
+- use_multiprocessing: True
+- only_pretrain_model: False
+- cpu_ram_mb: 3683
+- use_gpu: True
+- num_gpus: 1
+- gpu: Tesla K80
+- gpu_ram_mb: 11441
+- gpu_power_watts: 149.0
+- gpu_performance_state: 0
+- use_tpu: False
