@@ -226,4 +226,4 @@ It contains our pretrained model, config and vocab files.
 
 
 ///////////////////////////Qeustion Answering ////////////////////////////////////////////////////
-
+follow the the instructions on QA_vx.ipynb 
