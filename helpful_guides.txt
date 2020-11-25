@@ -223,3 +223,7 @@ ANERCorp : https://colab.research.google.com/drive/1qq_EbosfZuTFNB_zV42hF357TuX5
 
 Make sure this folder is added to your drive : https://drive.google.com/drive/folders/1_RmxaCi6fBAYEns-m2FsWDuds8moIXM_?usp=sharing
 It contains our pretrained model, config and vocab files.
+
+
+///////////////////////////Qeustion Answering ////////////////////////////////////////////////////
+
