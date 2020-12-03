@@ -227,3 +227,62 @@ It contains our pretrained model, config and vocab files.
 
 ///////////////////////////Qeustion Answering ////////////////////////////////////////////////////
 follow the the instructions on QA_vx.ipynb 
+
+
+//////////////////////////telegram bot////////////////////////////////////////////////////////////
+first download gpt2-xl:
+pip install regex==2017.4.5
+git clone https://github.com/graykode/gpt-2-Pytorch
+cd gpt-2-Pytorch
+curl --output gpt2-xl-pytorch_model.bin https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-xl-pytorch_model.bin
+
+then to use it with cmd copy the script simulate_conv_gpt_xl.py into gpt-2-Pytorch and run it.
+
+to run the bot in telegram do the following:
+(taken from the tutorail https://medium.com/jj-innovative-results/how-to-create-a-simple-telegram-bot-in-python-using-nginx-and-gcp-926f1b0fb16f )
+
+-update everything:
+sudo apt update -y && sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt dist-upgrade -y && sudo apt-get autoremove -y && sudo apt-get clean -y && sudo apt-get autoclean -y
+
+-intall telegram api and other dependencies:
+sudo apt-get install software-properties-common build-essential cmake git wget curl mosh vim nginx python3-pip && pip3 install python-telegram-bot
+
+-create private and public keys (you can choose any names for private and public keys, the EXTERNAL IP OF VM INSTANCE should be replaced with the IP of your instance):
+openssl req -newkey rsa:2048 -sha256 -nodes -keyout PRIVATE.key -x509 -days 365 -out PUBLIC.pem -subj “/C=US/ST=STATE/L=CITY/O=BUSINESS NAME/CN=EXTERNAL IP OF VM INSTANCE”
+
+-then move those files to /etc/nginx:
+sudo mv PUBLIC.pem /etc/nginx
+sudo mv PRIVATE.key /etc/nginx
+
+-create a telegram bot by searching for BotFather and create a bot, the BotFather will give you access token (TELEGRAMTOKEN) that we will use. 
+
+-create the config file (named TEXT here) for nginx () using command cd /etc/nginx/sites-available/ && sudo vim TEXT.txt and fill it with the following code (you should replace PUBLIC,private with the name you choose for the public,private keys also you should replace EXTERNAL IP OF VM INSTANCE with your VM ip and replace TELEGRAMTOKEN with the access token of your bot make sure to replace it in both places):
+server {
+  listen 80;
+  listen 443 ssl;
+  server_name EXTERNAL IP OF VM INSTANCE;
+  ssl_certificate /home/jj/PUBLIC.pem;
+  ssl_certificate_key /home/jj/PRIVATE.key;
+
+  location /TELEGRAMTOKEN {
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Scheme $scheme;
+    proxy_pass http://0.0.0.0:5000/TELEGRAMTOKEN/;
+    }
+}
+
+-then cd back from those files (cd ~)
+
+-activate this configrations:
+sudo ln -s /etc/nginx/sites-available/TEXT.txt /etc/nginx/sites-enabled/TEXT.txt
+
+-activate nginx (if every thing go well you should see that nginx is active (running)):
+sudo systemctl restart nginx && sudo systemctl status nginx
+
+-then use the file telegram_sim_conv_gpt_xl.py located in gpt file in this repo and move it to gpt-2-Pytorch, open telegram_sim_conv_gpt_xl.py and change TOKEN to your telegram token, server to the IP address of your VM and CERT to the path of the PUBLIC.pem (/etc/nginx/PUBLIC.pem)
+
+-everything is now ready just run telegram_sim_conv_gpt_xl.py and try out sending messages to your bot.
+
