@@ -95,7 +95,15 @@ bucket_name = '#your_bucket_name'
 #If you copy more than a few files, use the -m option for gsutil, as it will enable multi-threading and speed up the copy process significantly.
 
 
-////////////////////////////Installing Tensorflow 1.14.0///////////////////////////////////////////////////////
+////////////////////////////Installing Tensorflow 1.14.0////////////////////////////////////////////////////
+pip3 install tensorflow-gpu==1.14.0
+pip3 install tensorflow==1.14.0
+
+
+
+
+
+
 
 ////////////////////////////making create_pretraining_data.py work in bert pretraining/////////////////////////////////////
 this code will always give you OOM error if you are just shoving the whole dataset in one go
